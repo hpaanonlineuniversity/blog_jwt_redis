@@ -1,0 +1,52 @@
+services:
+  backend:
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    volumes:
+        - node_modules_backend:/app/node_modules
+        - ./backend:/app
+    env_file:
+      - .env
+    environment:
+      - MONGO_DBNAME=${MONGO_DBNAME}
+      - MONGO_HOST=${MONGO_HOST}
+      - MONGO_PORT=${MONGO_PORT}
+      - MONGO_USER=${MONGO_USER}
+      - MONGO_PASSWORD=${MONGO_PASSWORD}
+      - JWT_SECRET=${JWT_SECRET}
+      - USERNAME=${USERNAME}
+      - EMAIL=${EMAIL}
+      - PASSWORD=${PASSWORD}
+    depends_on:
+      - mongodb
+  mongodb:
+    image: mongo:noble
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=password
+    volumes:
+      - mongo-data:/data/db
+
+
+  frontend:
+    build: 
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "5173:5173"
+    volumes:
+        - node_modules_frontend:/app/node_modules
+        - ./frontend:/app
+    env_file:
+      - .env
+    environment:
+      - VITE_SUPABASE_URL=${VITE_SUPABASE_URL}
+      - VITE_SUPABASE_KEY=${VITE_SUPABASE_KEY}
+
+volumes:
+  node_modules_backend:
+  node_modules_frontend:
+  mongo-data:
