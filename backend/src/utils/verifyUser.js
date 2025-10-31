@@ -7,6 +7,8 @@ export const verifyToken = async (req, res, next) => {
     const token = req.cookies.access_token || 
                  req.header('Authorization')?.replace('Bearer ', '');
 
+    console.log("token :", req.cookies.access_token);
+
     if (!token) {
       return next(errorHandler(401, 'Access token required'));
     }

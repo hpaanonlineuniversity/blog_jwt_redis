@@ -1,6 +1,7 @@
 import { Avatar, Button, Card, Label, TextInput, Textarea, FileInput, Alert } from 'flowbite-react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useRef, useState, useEffect } from 'react';
+import { useNavigate } from 'react-router';
 import {
   updateUserStart,
   updateUserSuccess,
@@ -17,6 +18,8 @@ export default function PrivateProfile() {
   const [localProfilePic, setLocalProfilePic] = useState(currentUser?.profilePicture || '');
   const [updateSuccess, setUpdateSuccess] = useState(false);
   const fileRef = useRef(null);
+  const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
     username: currentUser?.username || '',
     email: currentUser?.email || '',
@@ -174,8 +177,16 @@ export default function PrivateProfile() {
 
   const handleSignOut = async () => {
     try {
-      await fetch(`/api/user/signout`);
-      dispatch(signOut());
+          const response = await fetch('/api/user/signout', {
+            method: 'POST',
+            credentials: 'include'
+          });
+          console.log('Signout response status:', response.status); // ✅ Debugging
+          if (response.ok) {
+            dispatch(signOut());
+            navigate('/sign-in');
+          }
+      
     } catch (error) {
       console.log(error);
     }
