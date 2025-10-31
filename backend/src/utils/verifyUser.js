@@ -1,19 +1,43 @@
-import jwt from 'jsonwebtoken';
+// utils/verifyUser.js
 import { errorHandler } from './error.js';
-import { JWT_SECRET } from '../configs/config.js'
-export const verifyToken = (req, res, next) => {
-  const token = req.cookies.access_token;
+import { verifyAccessToken, isTokenBlacklisted } from './jwt.js';
 
-  console.log(token);
-  
-  if (!token) {
-    return next(errorHandler(401, 'Unauthorized'));
-  }
-  jwt.verify(token, JWT_SECRET, (err, user) => {
-    if (err) {
-      return next(errorHandler(401, 'Unauthorized'));
+export const verifyToken = async (req, res, next) => {
+  try {
+    const token = req.cookies.access_token || 
+                 req.header('Authorization')?.replace('Bearer ', '');
+
+    if (!token) {
+      return next(errorHandler(401, 'Access token required'));
     }
-    req.user = user;
+
+    // Check if token is blacklisted
+    const isBlacklisted = await isTokenBlacklisted(token);
+    if (isBlacklisted) {
+      return next(errorHandler(401, 'Token has been revoked'));
+    }
+
+    // Verify token
+    const decoded = verifyAccessToken(token);
+    req.user = decoded;
+    
     next();
-  });
+  } catch (error) {
+    return next(errorHandler(401, 'Invalid or expired token'));
+  }
+};
+
+export const verifyAdmin = async (req, res, next) => {
+  try {
+    await verifyToken(req, res, (err) => {
+      if (err) return next(err);
+      
+      if (!req.user.isAdmin) {
+        return next(errorHandler(403, 'Admin access required'));
+      }
+      next();
+    });
+  } catch (error) {
+    next(error);
+  }
 };

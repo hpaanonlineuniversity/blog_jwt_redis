@@ -1,3 +1,4 @@
+// routes/user_route.js
 import express from 'express';
 import {
   deleteUser,
@@ -8,25 +9,16 @@ import {
   updateUser,
   updateUserAdmin,
 } from '../controllers/user_controller.js';
-import { verifyToken } from '../utils/verifyUser.js';
+import { verifyToken, verifyAdmin } from '../utils/verifyUser.js';
 
 const router = express.Router();
 
-//all route have not been tested yet
-
-router.get('/test', test);  //ok
-
-//do i need both put and post??
-router.put('/update/:userId', verifyToken, updateUser); //ok
-router.post('/update/:userId', verifyToken, updateUser); //ok
-
-router.delete('/delete/:userId', verifyToken, deleteUser); //ok
-router.get('/signout', signout); //ok
-
-router.get('/getusers', verifyToken, getUsers);  //  ok
-router.get('/:userId', getUser);  //ok
-
-
-router.put('/update-admin/:userId', verifyToken, updateUserAdmin);
+router.get('/test', verifyToken, test);
+router.put('/update/:userId', verifyToken, updateUser);
+router.delete('/delete/:userId', verifyToken, deleteUser);
+router.post('/signout', verifyToken, signout); // Changed to POST
+router.get('/getusers', verifyToken, verifyAdmin, getUsers);
+router.get('/:userId', getUser);
+router.put('/update-admin/:userId', verifyToken, verifyAdmin, updateUserAdmin);
 
 export default router;

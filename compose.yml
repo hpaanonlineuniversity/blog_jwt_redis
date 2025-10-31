@@ -20,8 +20,17 @@ services:
       - USERNAME=${USERNAME}
       - EMAIL=${EMAIL}
       - PASSWORD=${PASSWORD}
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=${REDIS_PORT}
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - JWT_ACCESS_SECRET=${JWT_ACCESS_SECRET}
+      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
+      - JWT_ACCESS_EXPIRY=${JWT_ACCESS_EXPIRY}
+      - JWT_REFRESH_EXPIRY=${JWT_REFRESH_EXPIRY}
     depends_on:
       - mongodb
+      - redis
+      
   mongodb:
     image: mongo:noble
     environment:
@@ -29,6 +38,18 @@ services:
       - MONGO_INITDB_ROOT_PASSWORD=password
     volumes:
       - mongo-data:/data/db
+
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    env_file:
+      - .env
+    environment:
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD}
 
 
   frontend:
@@ -50,3 +71,4 @@ volumes:
   node_modules_backend:
   node_modules_frontend:
   mongo-data:
+  redis_data:
