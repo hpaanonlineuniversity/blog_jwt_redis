@@ -42,8 +42,16 @@ export default function Callback() {
       });
       
       const data = await res.json();
-      console.log("checking data : ",data);
-      dispatch(signInSuccess(data));
+      const githubuserData = {
+          _id: data.user._id,
+          username: data.user.username,
+          email: data.user.email,
+          profilePicture: data.user.profilePicture,
+          isAdmin: data.user.isAdmin,
+        };
+
+
+      dispatch(signInSuccess(githubuserData));
 
       navigate('/');
       }

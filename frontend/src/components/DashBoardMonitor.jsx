@@ -151,7 +151,7 @@ export default function DashBoardMonitor() {
                 <h2 className='text-xl font-bold text-gray-800 dark:text-white'>Recent Users</h2>
                 <p className='text-gray-600 dark:text-gray-400 text-sm'>Newly registered users</p>
               </div>
-              <Button gradientMonochrome="purple" size="sm">
+              <Button color="purple" size="sm">
                 <Link to={'/dashboard?tab=users'}>View All</Link>
               </Button>
             </div>
@@ -195,7 +195,7 @@ export default function DashBoardMonitor() {
                 <h2 className='text-xl font-bold text-gray-800 dark:text-white'>Recent Posts</h2>
                 <p className='text-gray-600 dark:text-gray-400 text-sm'>Latest published articles</p>
               </div>
-              <Button gradientMonochrome="green" size="sm">
+              <Button color="green" size="sm">
                 <Link to={'/dashboard?tab=posts'}>View All</Link>
               </Button>
             </div>
@@ -240,7 +240,7 @@ export default function DashBoardMonitor() {
                 <h2 className='text-xl font-bold text-gray-800 dark:text-white'>Recent Comments</h2>
                 <p className='text-gray-600 dark:text-gray-400 text-sm'>Latest user interactions</p>
               </div>
-              <Button gradientMonochrome="blue" size="sm">
+              <Button color="blue" size="sm">
                 <Link to={'/dashboard?tab=comments'}>View All</Link>
               </Button>
             </div>

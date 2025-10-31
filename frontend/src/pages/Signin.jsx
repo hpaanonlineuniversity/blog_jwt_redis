@@ -49,11 +49,11 @@ export default function SignIn() {
       if (res.ok) {
         // User data ကို clear ဖြစ်အောင် format လုပ်ပါ
         const userData = {
-          _id: data._id,
-          username: data.username,
-          email: data.email,
-          profilePicture: data.profilePicture,
-          isAdmin: data.isAdmin,
+          _id: data.user._id,
+          username: data.user.username,
+          email: data.user.email,
+          profilePicture: data.user.profilePicture,
+          isAdmin: data.user.isAdmin,
         };
         dispatch(signInSuccess(userData));
         navigate('/');
