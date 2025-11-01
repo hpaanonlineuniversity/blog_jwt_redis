@@ -7,7 +7,7 @@ export const verifyToken = async (req, res, next) => {
     const token = req.cookies.access_token || 
                  req.header('Authorization')?.replace('Bearer ', '');
 
-    console.log("Token from cookies:", token ? "Exists" : "Missing");
+    //console.log("Token from cookies:", token ? "Exists" : "Missing");
 
     if (!token) {
       return next(errorHandler(401, 'Access token required'));
@@ -16,7 +16,7 @@ export const verifyToken = async (req, res, next) => {
     // Check if token is blacklisted - with error handling
     try {
       const isBlacklisted = await isTokenBlacklisted(token);
-      console.log("Is token blacklisted:", isBlacklisted);
+      //console.log("Is token blacklisted:", isBlacklisted);
       
       if (isBlacklisted) {
         return next(errorHandler(401, 'Token has been revoked'));
@@ -30,7 +30,7 @@ export const verifyToken = async (req, res, next) => {
     try {
       const decoded = verifyAccessToken(token);
       req.user = decoded;
-      console.log("Token verified for user:", decoded.id);
+      //console.log("Token verified for user:", decoded.id);
       next();
     } catch (jwtError) {
       console.log('JWT verification failed:', jwtError.message);

@@ -28,32 +28,8 @@ export const signup = async (req, res, next) => {
 
   try {
     await newUser.save();
-    
-    // Generate tokens
-    const tokens = generateTokens({
-      id: newUser._id.toString(),
-      username: newUser.username,
-      email: newUser.email,
-      isAdmin: newUser.isAdmin
-    });
 
-    // Store refresh token in Redis
-    await storeRefreshToken(newUser._id.toString(), tokens.refreshToken);
-
-    // Set cookies
     res
-      .cookie('access_token', tokens.accessToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
-        maxAge: 15 * 60 * 1000 // 15 minutes
-      })
-      .cookie('refresh_token', tokens.refreshToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
-        maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
-      })
       .status(201)
       .json({
         message: 'Signup successful',

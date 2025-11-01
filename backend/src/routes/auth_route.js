@@ -8,6 +8,6 @@ router.post('/signup', signup);
 router.post('/signin', signin);
 router.post('/refresh-token', refreshToken);
 router.post('/google', google);
-router.post('/logout', logout); // ✅ Add this
+router.post('/logout', logout);
 
 export default router;
