@@ -7,25 +7,38 @@ export const verifyToken = async (req, res, next) => {
     const token = req.cookies.access_token || 
                  req.header('Authorization')?.replace('Bearer ', '');
 
-    console.log("token :", req.cookies.access_token);
+    console.log("Token from cookies:", token ? "Exists" : "Missing");
 
     if (!token) {
       return next(errorHandler(401, 'Access token required'));
     }
 
-    // Check if token is blacklisted
-    const isBlacklisted = await isTokenBlacklisted(token);
-    if (isBlacklisted) {
-      return next(errorHandler(401, 'Token has been revoked'));
+    // Check if token is blacklisted - with error handling
+    try {
+      const isBlacklisted = await isTokenBlacklisted(token);
+      console.log("Is token blacklisted:", isBlacklisted);
+      
+      if (isBlacklisted) {
+        return next(errorHandler(401, 'Token has been revoked'));
+      }
+    } catch (redisError) {
+      console.error('Redis blacklist check failed:', redisError);
+      // Continue without blacklist check if Redis has issues
     }
 
     // Verify token
-    const decoded = verifyAccessToken(token);
-    req.user = decoded;
-    
-    next();
+    try {
+      const decoded = verifyAccessToken(token);
+      req.user = decoded;
+      console.log("Token verified for user:", decoded.id);
+      next();
+    } catch (jwtError) {
+      console.log('JWT verification failed:', jwtError.message);
+      return next(errorHandler(401, 'Invalid or expired token'));
+    }
   } catch (error) {
-    return next(errorHandler(401, 'Invalid or expired token'));
+    console.error('Token verification error:', error);
+    return next(errorHandler(401, 'Authentication failed'));
   }
 };
 

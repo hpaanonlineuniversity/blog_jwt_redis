@@ -76,32 +76,69 @@ export const deleteUser = async (req, res, next) => {
   }
 };
 
+// controllers/user_controller.js - Fixed signout
 export const signout = async (req, res, next) => {
   try {
+    console.log('Signout requested for user:', req.user?.id);
+    
     const accessToken = req.cookies.access_token;
     const refreshToken = req.cookies.refresh_token;
 
+    console.log('Access token exists:', !!accessToken);
+    console.log('Refresh token exists:', !!refreshToken);
+
+    // Clear cookies FIRST
+    res
+      .clearCookie('access_token', {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        path: '/'
+      })
+      .clearCookie('refresh_token', {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        path: '/'
+      })
+      .status(200)
+      .json({ 
+        success: true,
+        message: 'User has been signed out successfully' 
+      });
+
+    // THEN blacklist tokens (after response sent)
     if (accessToken) {
-      // Add access token to blacklist (15 minutes expiry)
-      await addToBlacklist(accessToken, 15 * 60);
+      try {
+        await addToBlacklist(accessToken, 15 * 60); // 15 minutes
+        console.log('Access token blacklisted');
+      } catch (error) {
+        console.error('Error blacklisting access token:', error);
+      }
     }
 
     if (refreshToken) {
-      // Add refresh token to blacklist (7 days expiry)
-      await addToBlacklist(refreshToken, 7 * 24 * 60 * 60);
-      
-      // Remove refresh token from Redis
-      const decoded = verifyRefreshToken(refreshToken);
-      await removeRefreshToken(decoded.id);
+      try {
+        await addToBlacklist(refreshToken, 7 * 24 * 60 * 60); // 7 days
+        await removeRefreshToken(req.user.id);
+        console.log('Refresh token removed from Redis');
+      } catch (error) {
+        console.error('Error handling refresh token:', error);
+      }
     }
 
+  } catch (error) {
+    console.error('Signout error:', error);
+    
+    // Still clear cookies on error
     res
       .clearCookie('access_token')
       .clearCookie('refresh_token')
       .status(200)
-      .json('User has been signed out');
-  } catch (error) {
-    next(error);
+      .json({ 
+        success: true,
+        message: 'User has been signed out' 
+      });
   }
 };
 
