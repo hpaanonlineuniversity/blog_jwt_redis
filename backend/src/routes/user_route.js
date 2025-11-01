@@ -4,7 +4,6 @@ import {
   deleteUser,
   getUser,
   getUsers,
-  signout,
   test,
   updateUser,
   updateUserAdmin,
@@ -16,7 +15,7 @@ const router = express.Router();
 router.get('/test', verifyToken, test);
 router.put('/update/:userId', verifyToken, updateUser);
 router.delete('/delete/:userId', verifyToken, deleteUser);
-router.post('/signout', verifyToken, signout); // Changed to POST
+
 router.get('/getusers', verifyToken, verifyAdmin, getUsers);
 router.get('/:userId', getUser);
 router.put('/update-admin/:userId', verifyToken, verifyAdmin, updateUserAdmin);
