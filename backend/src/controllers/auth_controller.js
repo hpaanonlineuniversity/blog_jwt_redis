@@ -126,23 +126,28 @@ export const signin = async (req, res, next) => {
 
 export const refreshToken = async (req, res, next) => {
   try {
+
     const oldRefreshToken = req.cookies.refresh_token;
-    
+
     if (!oldRefreshToken) {
       return next(errorHandler(401, 'Refresh token required'));
     }
-
-    // Verify old refresh token
+    
+    // 1. Verify old token
     const decoded = verifyRefreshToken(oldRefreshToken);
     
-    // Check if old refresh token exists in Redis
-    const storedRefreshToken = await getRefreshToken(decoded.id);
-    if (!storedRefreshToken || storedRefreshToken !== oldRefreshToken) {
-      return next(errorHandler(401, 'Invalid refresh token'));
+    // 2. Check if token exists in Redis and matches
+    const storedToken = await getRefreshToken(decoded.id);
+    if (storedToken !== oldRefreshToken) {
+      // Possible token reuse attack! Blacklist all tokens for this user
+      await removeRefreshToken(decoded.id);
+      await addToBlacklist(oldRefreshToken, 'EX', 7 * 24 * 60 * 60); // 7 days in seconds
+      return next(errorHandler(401, 'Security violation - token reused'));
     }
+    
 
     // ✅ OLD refresh token ကို blacklist ထဲထည့်
-    await addToBlacklist(oldRefreshToken, 7 * 24 * 60 * 60); // 7 days
+    await addToBlacklist(oldRefreshToken, 'EX', 7 * 24 * 60 * 60); // 7 days in seconds
 
     // Generate new tokens
     const tokens = generateTokens({
@@ -234,5 +239,45 @@ export const google = async (req, res, next) => {
       });
   } catch (error) {
     next(error);
+  }
+};
+
+// controllers/auth_controller.js
+
+export const logout = async (req, res, next) => {
+  try {
+    const accessToken = req.cookies.access_token;
+    const refreshToken = req.cookies.refresh_token;
+
+    if (refreshToken) {
+      try {
+        // Verify and get user info from refresh token
+        const decoded = verifyRefreshToken(refreshToken);
+        
+        // Remove refresh token from Redis
+        await removeRefreshToken(decoded.id);
+        
+        // Add both tokens to blacklist
+        await addToBlacklist(refreshToken, 'EX', 7 * 24 * 60 * 60); // 7 days
+      } catch (error) {
+        // Token might be expired, but we still want to clear cookies
+        console.log('Refresh token might be expired during logout');
+      }
+    }
+
+    if (accessToken) {
+      await addToBlacklist(accessToken, 'EX', 15 * 60); // 15 minutes
+    }
+
+    // Clear cookies
+    res
+      .clearCookie('access_token')
+      .clearCookie('refresh_token')
+      .status(200)
+      .json({
+        message: 'Logout successful'
+      });
+  } catch (error) {
+    next(errorHandler(500, 'Logout failed'));
   }
 };

@@ -34,10 +34,18 @@ export const verifyRefreshToken = (token) => {
   }
 };
 
-// Add token to blacklist
-export const addToBlacklist = async (token, expiry) => {
+
+// Add token to blacklist - FIXED VERSION
+export const addToBlacklist = async (token, mode, expiry) => {
   const tokenHash = Buffer.from(token).toString('base64');
-  await redisClient.set(`blacklist:${tokenHash}`, true, expiry);
+  
+  if (mode === 'EX') {
+    // EX mode with expiry in seconds
+    await redisClient.set(`blacklist:${tokenHash}`, 'true', mode, expiry);
+  } else {
+    // Backward compatibility
+    await redisClient.set(`blacklist:${tokenHash}`, 'true', 'EX', expiry);
+  }
 };
 
 // Check if token is blacklisted
