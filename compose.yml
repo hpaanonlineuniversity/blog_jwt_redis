@@ -11,6 +11,7 @@ services:
     env_file:
       - .env
     environment:
+      - NODE_ENV=${NODE_ENV}
       - MONGO_DBNAME=${MONGO_DBNAME}
       - MONGO_HOST=${MONGO_HOST}
       - MONGO_PORT=${MONGO_PORT}
