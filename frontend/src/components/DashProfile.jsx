@@ -1,6 +1,7 @@
 import { Avatar, Button, Card, Label, TextInput, Textarea, FileInput, Alert } from 'flowbite-react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useRef, useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router';
 import {
   updateUserStart,
   updateUserSuccess,
@@ -10,7 +11,6 @@ import {
   deleteUserFailure,
   signOut,
 } from '../redux/user/userSlice';
-import { Link } from 'react-router';
 
 export default function DashProfile() {
   const { currentUser, loading, error } = useSelector((state) => state.user);
@@ -18,6 +18,7 @@ export default function DashProfile() {
   const [localProfilePic, setLocalProfilePic] = useState(currentUser?.profilePicture || '');
   const [updateSuccess, setUpdateSuccess] = useState(false);
   const fileRef = useRef(null);
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     username: currentUser?.username || '',
     email: currentUser?.email || '',
@@ -175,8 +176,16 @@ export default function DashProfile() {
 
   const handleSignOut = async () => {
     try {
-      await fetch(`/api/user/signout`);
-      dispatch(signOut());
+          const response = await fetch('/api/user/signout', {
+            method: 'POST',
+            credentials: 'include'
+          });
+          console.log('Signout response status:', response.status); // ✅ Debugging
+          if (response.ok) {
+            dispatch(signOut());
+            navigate('/sign-in');
+          }
+      
     } catch (error) {
       console.log(error);
     }

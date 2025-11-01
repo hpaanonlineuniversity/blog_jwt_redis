@@ -30,8 +30,16 @@ const Header = () => {
 
   const handleSignOut = async () => {
     try {
-      await fetch(`/api/user/signout`);
-      dispatch(signOut());
+          const response = await fetch('/api/user/signout', {
+            method: 'POST',
+            credentials: 'include'
+          });
+          console.log('Signout response status:', response.status); // ✅ Debugging
+          if (response.ok) {
+            dispatch(signOut());
+            navigate('/sign-in');
+          }
+      
     } catch (error) {
       console.log(error);
     }

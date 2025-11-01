@@ -10,25 +10,35 @@ import {
 } from 'react-icons/hi';
 
 import { useEffect, useState } from 'react';
-import { Link, useLocation } from 'react-router';
+import { Link, useLocation, useNavigate } from 'react-router';
 import { signOut } from '../redux/user/userSlice';
 import { useDispatch, useSelector } from 'react-redux';
+
 
 export default function DashSidebar() {
   const location = useLocation();
   const dispatch = useDispatch();
   const { currentUser } = useSelector((state) => state.user);
   const [tab, setTab] = useState('');
+  const navigate = useNavigate();
 
+  const handleSignOut = async () => {
+    try {
+          const response = await fetch('/api/user/signout', {
+            method: 'POST',
+            credentials: 'include'
+          });
+          console.log('Signout response status:', response.status); // ✅ Debugging
+          if (response.ok) {
+            dispatch(signOut());
+            navigate('/sign-in');
+          }
+      
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
-    const handleSignOut = async () => {
-        try {
-                await fetch(`/api/user/signout`);
-                dispatch(signOut());
-                } catch (error) {
-                console.log(error);
-                }
-         };
 
   return (
     <Sidebar className='w-full md:w-56'>
