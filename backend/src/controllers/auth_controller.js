@@ -6,6 +6,7 @@ import {
   generateTokens, 
   verifyRefreshToken, 
   storeRefreshToken, 
+  getRefreshToken,
   removeRefreshToken,
   addToBlacklist 
 } from '../utils/jwt.js';
@@ -125,20 +126,23 @@ export const signin = async (req, res, next) => {
 
 export const refreshToken = async (req, res, next) => {
   try {
-    const refreshToken = req.cookies.refresh_token;
+    const oldRefreshToken = req.cookies.refresh_token;
     
-    if (!refreshToken) {
+    if (!oldRefreshToken) {
       return next(errorHandler(401, 'Refresh token required'));
     }
 
-    // Verify refresh token
-    const decoded = verifyRefreshToken(refreshToken);
+    // Verify old refresh token
+    const decoded = verifyRefreshToken(oldRefreshToken);
     
-    // Check if refresh token exists in Redis
+    // Check if old refresh token exists in Redis
     const storedRefreshToken = await getRefreshToken(decoded.id);
-    if (!storedRefreshToken || storedRefreshToken !== refreshToken) {
+    if (!storedRefreshToken || storedRefreshToken !== oldRefreshToken) {
       return next(errorHandler(401, 'Invalid refresh token'));
     }
+
+    // ✅ OLD refresh token ကို blacklist ထဲထည့်
+    await addToBlacklist(oldRefreshToken, 7 * 24 * 60 * 60); // 7 days
 
     // Generate new tokens
     const tokens = generateTokens({
