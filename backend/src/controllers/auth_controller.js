@@ -126,28 +126,36 @@ export const signin = async (req, res, next) => {
 
 export const refreshToken = async (req, res, next) => {
   try {
-
     const oldRefreshToken = req.cookies.refresh_token;
 
     if (!oldRefreshToken) {
       return next(errorHandler(401, 'Refresh token required'));
     }
     
+    console.log('🔄 Refresh token process started');
+    
     // 1. Verify old token
     const decoded = verifyRefreshToken(oldRefreshToken);
+    console.log('👤 User ID:', decoded.id);
     
     // 2. Check if token exists in Redis and matches
     const storedToken = await getRefreshToken(decoded.id);
+    console.log('🔍 Stored token matches:', storedToken === oldRefreshToken);
+    
     if (storedToken !== oldRefreshToken) {
       // Possible token reuse attack! Blacklist all tokens for this user
+      console.log('🚨 Security violation - token reuse detected!');
       await removeRefreshToken(decoded.id);
-      await addToBlacklist(oldRefreshToken, 'EX', 7 * 24 * 60 * 60); // 7 days in seconds
+      
+      // ✅ CORRECT: Add to blacklist
+      await addToBlacklist(oldRefreshToken, 7 * 24 * 60 * 60);
+      
       return next(errorHandler(401, 'Security violation - token reused'));
     }
     
-
-    // ✅ OLD refresh token ကို blacklist ထဲထည့်
-    await addToBlacklist(oldRefreshToken, 'EX', 7 * 24 * 60 * 60); // 7 days in seconds
+    // ✅ CORRECT: Add old refresh token to blacklist
+    await addToBlacklist(oldRefreshToken, 7 * 24 * 60 * 60);
+    console.log('✅ Old refresh token blacklisted');
 
     // Generate new tokens
     const tokens = generateTokens({
@@ -159,6 +167,7 @@ export const refreshToken = async (req, res, next) => {
 
     // Update refresh token in Redis
     await storeRefreshToken(decoded.id, tokens.refreshToken);
+    console.log('✅ New refresh token stored');
 
     // Set new cookies
     res
@@ -178,7 +187,11 @@ export const refreshToken = async (req, res, next) => {
       .json({
         message: 'Token refreshed successfully'
       });
+
+    console.log('✅ Token refresh completed');
+
   } catch (error) {
+    console.error('❌ Refresh token error:', error);
     next(errorHandler(401, 'Invalid refresh token'));
   }
 };
@@ -242,31 +255,39 @@ export const google = async (req, res, next) => {
   }
 };
 
-// controllers/auth_controller.js
-
 export const logout = async (req, res, next) => {
   try {
     const accessToken = req.cookies.access_token;
     const refreshToken = req.cookies.refresh_token;
 
+    console.log('🚪 Logout process started');
+    console.log('🔑 Access Token present:', !!accessToken);
+    console.log('🔑 Refresh Token present:', !!refreshToken);
+
     if (refreshToken) {
       try {
         // Verify and get user info from refresh token
         const decoded = verifyRefreshToken(refreshToken);
+        console.log('👤 User ID from token:', decoded.id);
         
         // Remove refresh token from Redis
         await removeRefreshToken(decoded.id);
+        console.log('✅ Refresh token removed from Redis');
         
-        // Add both tokens to blacklist
-        await addToBlacklist(refreshToken, 'EX', 7 * 24 * 60 * 60); // 7 days
+        // ✅ CORRECT: Add refresh token to blacklist (7 days)
+        await addToBlacklist(refreshToken, 7 * 24 * 60 * 60);
+        console.log('✅ Refresh token added to blacklist');
+        
       } catch (error) {
         // Token might be expired, but we still want to clear cookies
-        console.log('Refresh token might be expired during logout');
+        console.log('⚠️ Refresh token might be expired during logout:', error.message);
       }
     }
 
     if (accessToken) {
-      await addToBlacklist(accessToken, 'EX', 15 * 60); // 15 minutes
+      // ✅ CORRECT: Add access token to blacklist (15 minutes)
+      await addToBlacklist(accessToken, 15 * 60);
+      console.log('✅ Access token added to blacklist');
     }
 
     // Clear cookies
@@ -277,7 +298,11 @@ export const logout = async (req, res, next) => {
       .json({
         message: 'Logout successful'
       });
+
+    console.log('✅ Logout completed successfully');
+
   } catch (error) {
+    console.error('❌ Logout error:', error);
     next(errorHandler(500, 'Logout failed'));
   }
 };

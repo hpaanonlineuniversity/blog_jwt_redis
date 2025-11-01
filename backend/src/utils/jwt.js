@@ -34,38 +34,87 @@ export const verifyRefreshToken = (token) => {
   }
 };
 
+// utils/jwt.js - FIXED VERSION
 
-// Add token to blacklist - FIXED VERSION
-export const addToBlacklist = async (token, mode, expiry) => {
-  const tokenHash = Buffer.from(token).toString('base64');
-  
-  if (mode === 'EX') {
-    // EX mode with expiry in seconds
-    await redisClient.set(`blacklist:${tokenHash}`, 'true', mode, expiry);
-  } else {
-    // Backward compatibility
-    await redisClient.set(`blacklist:${tokenHash}`, 'true', 'EX', expiry);
+// Add token to blacklist - COMPLETELY FIXED
+export const addToBlacklist = async (token, expiry) => {
+  try {
+    const tokenHash = Buffer.from(token).toString('base64');
+    const key = `blacklist:${tokenHash}`;
+    
+    console.log(`🔄 Attempting to blacklist token: ${key.substring(0, 30)}...`);
+    console.log(`⏰ Expiry: ${expiry} seconds`);
+    
+    // ✅ CORRECT: Store as simple string without JSON.stringify
+    const result = await redisClient.set(key, 'true', 'EX', expiry);
+    
+    if (result) {
+      console.log(`✅ SUCCESS: Token blacklisted: ${key.substring(0, 30)}...`);
+      
+      // Verify it was actually stored
+      const verify = await redisClient.get(key);
+      console.log(`🔍 Verification: ${key.substring(0, 30)}... = ${verify}`);
+    } else {
+      console.log(`❌ FAILED: Could not blacklist token`);
+    }
+    
+    return result;
+  } catch (error) {
+    console.error('❌ Blacklist error:', error);
+    throw error;
   }
 };
 
-// Check if token is blacklisted
+// Check if token is blacklisted - FIXED
 export const isTokenBlacklisted = async (token) => {
-  const tokenHash = Buffer.from(token).toString('base64');
-  return await redisClient.exists(`blacklist:${tokenHash}`);
+  try {
+    const tokenHash = Buffer.from(token).toString('base64');
+    const key = `blacklist:${tokenHash}`;
+    const result = await redisClient.get(key);
+    
+    console.log(`🔍 Blacklist check: ${key.substring(0, 30)}... = ${result}`);
+    return result === 'true';
+  } catch (error) {
+    console.error('❌ Blacklist check error:', error);
+    return false;
+  }
 };
 
-// Store refresh token in Redis
+// Store refresh token in Redis - FIXED
 export const storeRefreshToken = async (userId, refreshToken) => {
   const expiry = 7 * 24 * 60 * 60; // 7 days in seconds
-  await redisClient.set(`refresh_token:${userId}`, refreshToken, expiry);
+  const key = `refresh_token:${userId}`;
+  
+  console.log(`🔄 Storing refresh token for user: ${userId}`);
+  const result = await redisClient.set(key, refreshToken, 'EX', expiry);
+  
+  if (result) {
+    console.log(`✅ Refresh token stored: ${key}`);
+    
+    // Verify storage
+    const verify = await redisClient.get(key);
+    console.log(`🔍 Refresh token verification: ${key} = ${verify ? 'Exists' : 'Missing'}`);
+  }
+  
+  return result;
 };
 
-// Get refresh token from Redis
+// Get refresh token from Redis - FIXED
 export const getRefreshToken = async (userId) => {
-  return await redisClient.get(`refresh_token:${userId}`);
+  const key = `refresh_token:${userId}`;
+  const result = await redisClient.get(key);
+  
+  console.log(`🔍 Getting refresh token: ${key} = ${result ? 'Exists' : 'Missing'}`);
+  return result;
 };
 
-// Remove refresh token from Redis (on logout)
+// Remove refresh token from Redis - FIXED
 export const removeRefreshToken = async (userId) => {
-  await redisClient.del(`refresh_token:${userId}`);
+  const key = `refresh_token:${userId}`;
+  console.log(`🗑️ Removing refresh token: ${key}`);
+  
+  const result = await redisClient.del(key);
+  console.log(`✅ Refresh token removed: ${key} - Success: ${result}`);
+  
+  return result;
 };
