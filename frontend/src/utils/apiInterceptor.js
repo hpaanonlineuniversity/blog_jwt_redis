@@ -16,26 +16,30 @@ class ApiInterceptor {
     };
 
     try {
-      const response = await fetch(url, config);
-      
-      // ✅ 401 Error - Silent refresh (no console log)
-      if (response.status === 401 && !url.includes('/auth/')) {
-        return await this.handleTokenRefresh(url, options);
+        const response = await fetch(url, config);
+        
+        // ✅ 401 Error - Silent refresh (no console log)
+        if (response.status === 401 && !url.includes('/auth/')) {
+          return await this.handleTokenRefresh(url, options);
+        }
+
+        return response;
+      } catch (error) {
+        // ✅ COMPLETELY SILENT for auth/token errors
+        const isSilentError = 
+          error.message?.includes('Authentication') || 
+          error.message?.includes('Unauthorized') ||
+          error.message?.includes('token') ||
+          error.name === 'TypeError' ||
+          error.silent;
+
+        if (!isSilentError) {
+          console.error('API request failed:', error);
+        }
+        
+        throw error;
       }
 
-      return response;
-    } catch (error) {
-      // ✅ COMPLETELY SILENT for auth/token errors
-      if (error.message.includes('Authentication') || 
-          error.message.includes('token') ||
-          error.name === 'TypeError' ||
-          error.silent) {
-        // No console logging - completely silent
-      } else {
-        console.error('API request failed:', error);
-      }
-      throw error;
-    } 
   }
 
   async handleTokenRefresh(originalUrl, originalOptions) {
