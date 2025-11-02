@@ -59,27 +59,27 @@ export default function PostCard({ post, loading = false }) {
         className="block relative overflow-hidden"
         aria-label={`Read ${post.title}`}
       >
-        <div className="h-40 w-full overflow-hidden">
-          {post.image && post.image.trim() !== '' && !imageError ? (
-            <img
-              src={post.image}
-              alt={post.title}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-              onError={() => setImageError(true)}
-              loading="lazy"
-            />
-          ) : (
-            // Fallback UI when no image
-            <div className="w-full h-full bg-gradient-to-br from-teal-50 to-blue-50 flex items-center justify-center">
-              <div className="text-center text-teal-400">
-                <svg className="w-8 h-8 mx-auto mb-1 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
-                <span className="text-xs font-medium">No Image</span>
-              </div>
-            </div>
-          )}    
+        // PostCard.jsx - image rendering part
+    <div className="h-40 w-full overflow-hidden">
+      {post.image && post.image.trim() !== '' && !imageError ? (
+        <img
+          src={post.image}
+          alt={post.title}
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+          onError={() => setImageError(true)}
+          loading="lazy"
+        />
+      ) : (
+        <div className="w-full h-full bg-gradient-to-br from-teal-50 to-blue-50 flex items-center justify-center">
+          <div className="text-center text-teal-400">
+            <svg className="w-8 h-8 mx-auto mb-1 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+            <span className="text-xs font-medium">No Image</span>
+          </div>
         </div>
+      )}
+    </div>
         
         {/* Category Badge - Overlay on image */}
         <div className="absolute top-2 left-2">

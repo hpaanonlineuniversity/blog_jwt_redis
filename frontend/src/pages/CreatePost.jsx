@@ -137,9 +137,12 @@ export default function CreatePost() {
       console.log('Update response:', data);
 
       if (!res.ok) {
-        setPublishError(data.message);
-        return;
+      // ✅ Only show user-friendly errors, not 401 errors
+      if (res.status !== 401) {
+        setPublishError(data.message || 'Something went wrong');
       }
+      return;
+    }
 
       if (res.ok) {
         setPublishError(null);

@@ -19,16 +19,25 @@ class ApiInterceptor {
     try {
       const response = await fetch(url, config);
       
-      // ✅ Token expired - try to refresh (only for 401 and not auth endpoints)
+       // ✅ Token expired - try to refresh
       if (response.status === 401 && !url.includes('/auth/')) {
+        console.log('🔄 Token expired, attempting auto-refresh...');
         return await this.handleTokenRefresh(url, options);
       }
-      
+
       return response;
-    } catch (error) {
-      console.error('API request failed:', error);
+    }catch (error) {
+      // ✅ COMPLETELY SILENT for network errors during refresh
+      // Don't log anything, don't throw to console
+      if (error.message.includes('Authentication') || 
+          error.message.includes('token') ||
+          error.name === 'TypeError') {
+        // Silent fail - no console logging
+      } else {
+        console.error('API request failed:', error);
+      }
       throw error;
-    }
+    } 
   }
 
   async handleTokenRefresh(originalUrl, originalOptions) {
@@ -47,9 +56,7 @@ class ApiInterceptor {
     this.isRefreshing = true;
 
     try {
-      console.log('Attempting token refresh...');
-      
-      // ✅ CHANGE: Use '/api/auth/refresh-token' instead of '/api/auth/refresh'
+       
       const refreshResponse = await fetch('/api/auth/refresh-token', {
         method: 'POST',
         credentials: 'include', // Refresh token cookie is automatically sent
@@ -59,9 +66,7 @@ class ApiInterceptor {
       });
 
       if (refreshResponse.ok) {
-        console.log('Token refresh successful');
-        
-        // ✅ Retry all failed requests
+ 
         this.retryFailedRequests();
         
         // ✅ Retry the original request
@@ -70,13 +75,18 @@ class ApiInterceptor {
           credentials: 'include',
         });
       } else {
-        console.log('Token refresh failed');
+        
         this.handleRefreshFailure();
-        throw new Error('Authentication session expired. Please sign in again.');
+        // ✅ Throw silent error
+        const error = new Error('Authentication failed');
+        error.silent = true;
+        throw error;
+
       }
     } catch (error) {
-      console.error('Token refresh error:', error);
       this.handleRefreshFailure();
+         // ✅ Mark as silent error
+      error.silent = true;
       throw error;
     } finally {
       this.isRefreshing = false;
@@ -84,7 +94,6 @@ class ApiInterceptor {
   }
 
   retryFailedRequests() {
-    console.log(`Retrying ${this.failedRequests.length} failed requests`);
     
     this.failedRequests.forEach(({ resolve, reject, originalUrl, originalOptions }) => {
       fetch(originalUrl, {
@@ -98,9 +107,7 @@ class ApiInterceptor {
   }
 
   handleRefreshFailure() {
-    // Clear any auth state and redirect to login
-    console.log('Redirecting to signin page...');
-    
+
     // Clear Redux state if needed
     if (typeof window !== 'undefined' && window.location.pathname !== '/signin') {
       window.location.href = '/signin';
