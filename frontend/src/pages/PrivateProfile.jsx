@@ -2,6 +2,7 @@ import { Avatar, Button, Card, Label, TextInput, Textarea, FileInput, Alert } fr
 import { useDispatch, useSelector } from 'react-redux';
 import { useRef, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router';
+import { apiInterceptor } from '../utils/apiInterceptor';
 import {
   updateUserStart,
   updateUserSuccess,
@@ -118,7 +119,7 @@ export default function PrivateProfile() {
     e.preventDefault();
     try {
       dispatch(updateUserStart());
-      const res = await fetch(`/api/user/update/${currentUser._id}`, {
+      const res = await apiInterceptor.request(`/api/user/update/${currentUser._id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -159,7 +160,7 @@ export default function PrivateProfile() {
     if (window.confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
       try {
         dispatch(deleteUserStart());
-        const res = await fetch(`/api/user/delete/${currentUser._id}`, {
+        const res = await apiInterceptor.request(`/api/user/delete/${currentUser._id}`, {
           method: 'DELETE',
           credentials: 'include',
         });

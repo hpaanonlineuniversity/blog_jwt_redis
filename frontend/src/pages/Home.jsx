@@ -2,7 +2,7 @@ import { Link } from 'react-router';
 import CallToAction from '../components/CallToAction';
 import { useEffect, useState } from 'react';
 import PostCard from '../components/PostCard';
-import { apiInterceptor } from '../utils/apiInterceptor'; // ✅ Import the interceptor
+import { apiInterceptor } from '../utils/apiInterceptor'; 
 
 export default function Home() {
   const [posts, setPosts] = useState([]);

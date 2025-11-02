@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
+import { apiInterceptor } from '../utils/apiInterceptor';
 import {
   HiAnnotation,
   HiArrowNarrowUp,
@@ -32,9 +33,9 @@ export default function DashBoardMonitor() {
         setLoading(true);
         
         const [usersRes, postsRes, commentsRes] = await Promise.all([
-          fetch('/api/user/getusers?limit=5'),
-          fetch('/api/post/getposts?limit=5'),
-          fetch('/api/comment/getcomments?limit=5')
+          apiInterceptor.request('/api/user/getusers?limit=5'),
+          apiInterceptor.request('/api/post/getposts?limit=5'),
+          apiInterceptor.request('/api/comment/getcomments?limit=5')
         ]);
 
         const usersData = await usersRes.json();

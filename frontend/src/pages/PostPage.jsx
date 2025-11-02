@@ -4,6 +4,7 @@ import { Link, useParams } from 'react-router';
 import CallToAction from '../components/CallToAction';
 import CommentSection from '../components/CommentSection';
 import PostCard from '../components/PostCard';
+import { apiInterceptor } from '../utils/apiInterceptor';
 
 export default function PostPage() {
   const { postSlug } = useParams();
@@ -20,7 +21,7 @@ export default function PostPage() {
         setError(false);
         setImageError(false);
         
-        const res = await fetch(`/api/post/getposts?slug=${postSlug}`);
+        const res = await apiInterceptor.request(`/api/post/getposts?slug=${postSlug}`);
         const data = await res.json();
         
         if (!res.ok) {
@@ -34,7 +35,7 @@ export default function PostPage() {
           
           // Fetch recent posts
           try {
-            const recentRes = await fetch('/api/post/getposts?limit=4&sortDirection=desc');
+            const recentRes = await apiInterceptor.request('/api/post/getposts?limit=4&sortDirection=desc');
             const recentData = await recentRes.json();
             if (recentRes.ok && recentData.posts) {
               // Filter out the current post from recent posts and take first 3

@@ -4,6 +4,7 @@ import { useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router';
 import Comment from './Comment';
 import DeleteConfirmationModal from './DeleteConfirmationModal';
+import { apiInterceptor } from '../utils/apiInterceptor'; 
 
 
 export default function CommentSection({ postId }) {
@@ -23,7 +24,7 @@ export default function CommentSection({ postId }) {
     }
 
     try {
-      const res = await fetch('/api/comment/create', {
+      const res = await apiInterceptor.request('/api/comment/create', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -67,7 +68,7 @@ export default function CommentSection({ postId }) {
       return;
     }
     try {
-      const res = await fetch(`/api/comment/likeComment/${commentId}`, {
+      const res = await apiInterceptor.request(`/api/comment/likeComment/${commentId}`, {
         method: 'PUT',
       });
       if (res.ok) {
@@ -100,7 +101,7 @@ export default function CommentSection({ postId }) {
   const handleDelete = async (commentId) => {
     setShowModal(false);
     try {
-      const res = await fetch(`/api/comment/deleteComment/${commentId}`, {
+      const res = await apiInterceptor.request(`/api/comment/deleteComment/${commentId}`, {
         method: 'DELETE',
       });
       if (res.ok) {

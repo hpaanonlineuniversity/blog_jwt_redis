@@ -12,6 +12,7 @@ import {
 import { useState, useRef, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, useParams } from 'react-router';
+import { apiInterceptor } from '../utils/apiInterceptor';
 
 export default function UpdatePost() {
   const navigate = useNavigate();
@@ -26,6 +27,7 @@ export default function UpdatePost() {
   const dispatch = useDispatch();
   const [publishError, setPublishError] = useState(null);
   const [publishSuccess, setPublishSuccess] = useState(null);
+  
 
   // Initialize formData state
   const [formData, setFormData] = useState({
@@ -40,7 +42,7 @@ export default function UpdatePost() {
     const fetchPost = async () => {
       try {
         setLoading(true);
-        const res = await fetch(`/api/post/getposts?postId=${postId}`);
+        const res = await apiInterceptor.request(`/api/post/getposts?postId=${postId}`);
         const data = await res.json();
         
         if (!res.ok) {
@@ -168,7 +170,7 @@ export default function UpdatePost() {
     try {
       setLoading(true);
       
-      const res = await fetch(`/api/post/updatepost/${postId}/${currentUser._id}`, {
+      const res = await apiInterceptor.request(`/api/post/updatepost/${postId}/${currentUser._id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

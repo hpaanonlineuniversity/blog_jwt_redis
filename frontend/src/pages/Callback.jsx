@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router';
 import { supabase } from '../supabase.js'
 import { useDispatch } from 'react-redux'
 import { signInSuccess } from '../redux/user/userSlice.js';
+import { apiInterceptor } from '../utils/apiInterceptor';
 
 export default function Callback() {
   const navigate = useNavigate();
@@ -28,7 +29,7 @@ export default function Callback() {
         console.log('User Info:', userData);
 
 
-        const res = await fetch('/api/auth/google', {
+        const res = await apiInterceptor.request('/api/auth/google', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

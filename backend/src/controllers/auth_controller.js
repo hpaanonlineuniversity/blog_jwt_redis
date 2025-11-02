@@ -213,7 +213,7 @@ export const google = async (req, res, next) => {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax',
-        maxAge: 15 * 60 * 1000
+        maxAge: 1 * 60 * 1000
       })
       .cookie('refresh_token', tokens.refreshToken, {
         httpOnly: true,

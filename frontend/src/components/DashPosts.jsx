@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { Link } from 'react-router';
 import DeleteConfirmationModal from './DeleteConfirmationModal';
+import { apiInterceptor } from '../utils/apiInterceptor'; 
 import { 
   HiOutlineNewspaper, 
   HiOutlineEye, 
@@ -71,7 +72,7 @@ export default function DashPosts() {
   const handleDeletePost = async () => {
     try {
       setError('');
-      const res = await fetch(`/api/post/deletepost/${postIdToDelete}/${currentUser._id}`, {
+      const res = await apiInterceptor.request(`/api/post/deletepost/${postIdToDelete}/${currentUser._id}`, {
         method: 'DELETE',
       });
 

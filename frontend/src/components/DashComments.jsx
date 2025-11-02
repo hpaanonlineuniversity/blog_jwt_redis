@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import DeleteConfirmationModal from './DeleteConfirmationModal';
+import { apiInterceptor } from '../utils/apiInterceptor';
 
 export default function DashComments() {
   const { currentUser } = useSelector((state) => state.user);
@@ -14,7 +15,7 @@ export default function DashComments() {
     const fetchComments = async () => {
       try {
         setLoading(true);
-        const res = await fetch(`/api/comment/getcomments`);
+        const res = await apiInterceptor.request(`/api/comment/getcomments`);
         const data = await res.json();
 
         if (res.ok) {
@@ -35,7 +36,7 @@ export default function DashComments() {
   const handleShowMore = async () => {
     const startIndex = comments.length;
     try {
-      const res = await fetch(`/api/comment/getcomments?startIndex=${startIndex}`);
+      const res = await apiInterceptor.request(`/api/comment/getcomments?startIndex=${startIndex}`);
       const data = await res.json();
       
       if (res.ok) {
@@ -50,7 +51,7 @@ export default function DashComments() {
   const handleDeleteComment = async () => {
     setShowModal(false);
     try {
-      const res = await fetch(`/api/comment/deleteComment/${commentIdToDelete}`, {
+      const res = await apiInterceptor.request(`/api/comment/deleteComment/${commentIdToDelete}`, {
         method: 'DELETE',
       });
 

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import DeleteConfirmationModal from './DeleteConfirmationModal';
+import { apiInterceptor } from '../utils/apiInterceptor'; 
 
 export default function DashUsers() {
   const { currentUser } = useSelector((state) => state.user);
@@ -11,12 +12,13 @@ export default function DashUsers() {
   const [loading, setLoading] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [startIndex, setStartIndex] = useState(0);
+  
 
   useEffect(() => {
     const fetchUsers = async () => {
       try {
         setLoading(true);
-        const res = await fetch(`/api/user/getusers`);
+        const res = await apiInterceptor.request(`/api/user/getusers`);
         const data = await res.json();
         if (res.ok) {
           setUsers(data.users);
@@ -39,7 +41,7 @@ export default function DashUsers() {
   const handleShowMore = async () => {
     try {
       setLoading(true);
-      const res = await fetch(`/api/user/getusers?startIndex=${startIndex}`);
+      const res = await apiInterceptor.request(`/api/user/getusers?startIndex=${startIndex}`);
       const data = await res.json();
       if (res.ok) {
         setUsers((prev) => [...prev, ...data.users]);
@@ -58,7 +60,7 @@ export default function DashUsers() {
   const handleDeleteUser = async () => {
     try {
       setDeleting(true);
-      const res = await fetch(`/api/user/delete/${userIdToDelete}`, {
+      const res = await apiInterceptor.request(`/api/user/delete/${userIdToDelete}`, {
         credentials: 'include',
         method: 'DELETE',
       });
@@ -81,7 +83,7 @@ export default function DashUsers() {
 
   const handleToggleAdmin = async (userId, currentAdminStatus) => {
   try {
-    const res = await fetch(`/api/user/update-admin/${userId}`, {
+    const res = await apiInterceptor.request(`/api/user/update-admin/${userId}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
