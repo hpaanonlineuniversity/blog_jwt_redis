@@ -60,7 +60,7 @@ export default function PostCard({ post, loading = false }) {
         aria-label={`Read ${post.title}`}
       >
         <div className="h-40 w-full overflow-hidden">
-          {!imageError ? (
+          {post.image && post.image.trim() !== '' && !imageError ? (
             <img
               src={post.image}
               alt={post.title}
@@ -69,6 +69,7 @@ export default function PostCard({ post, loading = false }) {
               loading="lazy"
             />
           ) : (
+            // Fallback UI when no image
             <div className="w-full h-full bg-gradient-to-br from-teal-50 to-blue-50 flex items-center justify-center">
               <div className="text-center text-teal-400">
                 <svg className="w-8 h-8 mx-auto mb-1 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -77,7 +78,7 @@ export default function PostCard({ post, loading = false }) {
                 <span className="text-xs font-medium">No Image</span>
               </div>
             </div>
-          )}
+          )}    
         </div>
         
         {/* Category Badge - Overlay on image */}
