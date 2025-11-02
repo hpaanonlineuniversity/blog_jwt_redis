@@ -82,7 +82,7 @@ export const signin = async (req, res, next) => {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax',
-        maxAge: 1 * 60 * 1000 // 15 minutes
+        maxAge: 15 * 60 * 1000 // 15 minutes
       })
       .cookie('refresh_token', tokens.refreshToken, {
         httpOnly: true,
@@ -151,7 +151,7 @@ export const refreshToken = async (req, res, next) => {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax',
-        maxAge: 1 * 60 * 1000
+        maxAge: 15 * 60 * 1000
       })
       .cookie('refresh_token', tokens.refreshToken, {
         httpOnly: true,
@@ -213,7 +213,7 @@ export const google = async (req, res, next) => {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax',
-        maxAge: 1 * 60 * 1000
+        maxAge: 15 * 60 * 1000
       })
       .cookie('refresh_token', tokens.refreshToken, {
         httpOnly: true,
