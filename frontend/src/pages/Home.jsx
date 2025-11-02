@@ -92,11 +92,31 @@ export default function Home() {
           <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl overflow-hidden transform hover:scale-[1.02] transition-transform duration-300">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               <div className="relative h-80 lg:h-full">
-                <img
-                  src={featuredPost.image}
-                  alt={featuredPost.title}
-                  className="w-full h-full object-cover"
-                />
+                {/* Fixed image section with fallback */}
+                {featuredPost.image && featuredPost.image.trim() !== '' ? (
+                  <img
+                    src={featuredPost.image}
+                    alt={featuredPost.title}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      e.target.style.display = 'none';
+                      e.target.nextSibling.style.display = 'flex';
+                    }}
+                  />
+                ) : null}
+                
+                {/* Fallback image UI */}
+                <div 
+                  className={`w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-100 to-purple-100 dark:from-gray-700 dark:to-gray-600 ${featuredPost.image && featuredPost.image.trim() !== '' ? 'hidden' : 'flex'}`}
+                >
+                  <div className="text-center">
+                    <svg className="w-16 h-16 text-gray-400 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    <p className="text-gray-500 dark:text-gray-400 text-sm">No image available</p>
+                  </div>
+                </div>
+                
                 <div className="absolute top-4 left-4">
                   <span className="px-3 py-1 bg-blue-600 text-white text-sm font-semibold rounded-full">
                     Featured
@@ -107,7 +127,7 @@ export default function Home() {
               <div className="p-8 flex flex-col justify-center">
                 <div className="flex items-center gap-4 mb-4">
                   <span className="px-3 py-1 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 text-sm font-medium rounded-full">
-                    {featuredPost.category}
+                    {featuredPost.category || 'Uncategorized'}
                   </span>
                   <span className="text-gray-500 dark:text-gray-400 text-sm">
                     {calculateReadingTime(featuredPost.content)} min read
@@ -119,20 +139,37 @@ export default function Home() {
                 </h3>
                 
                 <p className="text-gray-600 dark:text-gray-300 mb-6 line-clamp-3">
-                  {featuredPost.content.replace(/<[^>]*>/g, '').substring(0, 200)}...
+                  {featuredPost.content ? featuredPost.content.replace(/<[^>]*>/g, '').substring(0, 200) + '...' : 'No content available...'}
                 </p>
                 
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <img
-                      src={featuredPost.userProfilePicture}
-                      alt={featuredPost.username}
-                      className="w-10 h-10 rounded-full border-2 border-blue-200 dark:border-blue-800"
-                    />
+                    {/* User profile picture with fallback */}
+                    {featuredPost.userProfilePicture && featuredPost.userProfilePicture.trim() !== '' ? (
+                      <img
+                        src={featuredPost.userProfilePicture}
+                        alt={featuredPost.username}
+                        className="w-10 h-10 rounded-full border-2 border-blue-200 dark:border-blue-800 object-cover"
+                        onError={(e) => {
+                          e.target.style.display = 'none';
+                          e.target.nextSibling.style.display = 'flex';
+                        }}
+                      />
+                    ) : null}
+                    
+                    {/* Fallback user avatar */}
+                    <div 
+                      className={`w-10 h-10 rounded-full border-2 border-blue-200 dark:border-blue-800 bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white font-semibold ${featuredPost.userProfilePicture && featuredPost.userProfilePicture.trim() !== '' ? 'hidden' : 'flex'}`}
+                    >
+                      {featuredPost.username ? featuredPost.username.charAt(0).toUpperCase() : 'U'}
+                    </div>
+                    
                     <div>
-                      <p className="font-semibold text-gray-900 dark:text-white">{featuredPost.username}</p>
+                      <p className="font-semibold text-gray-900 dark:text-white">
+                        {featuredPost.username || 'Unknown Author'}
+                      </p>
                       <p className="text-sm text-gray-500 dark:text-gray-400">
-                        {new Date(featuredPost.createdAt).toLocaleDateString()}
+                        {featuredPost.createdAt ? new Date(featuredPost.createdAt).toLocaleDateString() : 'Unknown date'}
                       </p>
                     </div>
                   </div>
