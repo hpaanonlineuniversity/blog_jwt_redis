@@ -1,6 +1,7 @@
+// src/components/SignIn.js
 import { Alert, Button, Label, Spinner, TextInput, Card } from 'flowbite-react';
 import { useState } from 'react';
-import { Link , useNavigate } from 'react-router';
+import { Link, useNavigate } from 'react-router';
 import OAuth from '../components/OAuth';
 import { useDispatch, useSelector } from 'react-redux';
 import {
@@ -8,6 +9,7 @@ import {
   signInSuccess,
   signInFailure,
 } from '../redux/user/userSlice';
+import { apiInterceptor } from '../utils/apiInterceptor'; // ✅ Import the interceptor
 
 export default function SignIn() {
   const [formData, setFormData] = useState({});
@@ -25,29 +27,28 @@ export default function SignIn() {
     if (!formData.email || !formData.password) {
       return dispatch(signInFailure('Please fill all the fields'));
     }
+
     try {
       dispatch(signInStart());
-      const res = await fetch('/api/auth/signin', {
+      
+      // ✅ Use apiInterceptor instead of direct fetch
+      const res = await apiInterceptor.request('/api/auth/signin', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
         body: JSON.stringify(formData),
+        // credentials: 'include' is already handled in interceptor
       });
+      
       const data = await res.json();
-
-      console.log(data);
+      console.log('SignIn Response:', data);
 
       if (data.success === false) {
         dispatch(signInFailure(data.message));
+        return;
       }
-/*
+
       if (res.ok) {
-        dispatch(signInSuccess(data));
-        navigate('/');
-      }
-        */
-      if (res.ok) {
-        // User data ကို clear ဖြစ်အောင် format လုပ်ပါ
+        // User data formatting
         const userData = {
           _id: data.user._id,
           username: data.user.username,
@@ -55,13 +56,16 @@ export default function SignIn() {
           profilePicture: data.user.profilePicture,
           isAdmin: data.user.isAdmin,
         };
+        
         dispatch(signInSuccess(userData));
         navigate('/');
       }
     } catch (error) {
-      dispatch(signInFailure(error.message));
+      console.error('SignIn error:', error);
+      dispatch(signInFailure(
+        error.message || 'Sign in failed. Please try again.'
+      ));
     }
-
   };
 
   return (

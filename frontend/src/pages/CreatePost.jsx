@@ -12,6 +12,7 @@ import {
 import { useState, useRef, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router';
+import { apiInterceptor } from '../utils/apiInterceptor'; // ✅ Import the interceptor
 
 export default function CreatePost() {
   const navigate = useNavigate(); 
@@ -123,7 +124,7 @@ export default function CreatePost() {
     console.log('Form Data:', formData);
     
     try {
-      const res = await fetch('/api/post/create/', {
+      const res = await apiInterceptor.request('/api/post/create/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

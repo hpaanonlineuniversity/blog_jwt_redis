@@ -2,6 +2,7 @@ import { Link } from 'react-router';
 import CallToAction from '../components/CallToAction';
 import { useEffect, useState } from 'react';
 import PostCard from '../components/PostCard';
+import { apiInterceptor } from '../utils/apiInterceptor'; // ✅ Import the interceptor
 
 export default function Home() {
   const [posts, setPosts] = useState([]);
@@ -12,7 +13,7 @@ export default function Home() {
     const fetchPosts = async () => {
       try {
         setLoading(true);
-        const res = await fetch('/api/post/getposts?limit=8');
+        const res = await apiInterceptor.request('/api/post/getposts?limit=8');
         const data = await res.json();
         setPosts(data.posts);
         
