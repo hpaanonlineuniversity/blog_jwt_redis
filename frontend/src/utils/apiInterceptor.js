@@ -6,10 +6,9 @@ class ApiInterceptor {
   }
 
   async request(url, options = {}) {
-    // ✅ Cookies are automatically included with credentials: 'include'
     const config = {
       ...options,
-      credentials: 'include', // Ensure cookies are sent
+      credentials: 'include',
       headers: {
         'Content-Type': 'application/json',
         ...options.headers,
@@ -19,20 +18,19 @@ class ApiInterceptor {
     try {
       const response = await fetch(url, config);
       
-       // ✅ Token expired - try to refresh
+      // ✅ 401 Error - Silent refresh (no console log)
       if (response.status === 401 && !url.includes('/auth/')) {
-        console.log('🔄 Token expired, attempting auto-refresh...');
         return await this.handleTokenRefresh(url, options);
       }
 
       return response;
-    }catch (error) {
-      // ✅ COMPLETELY SILENT for network errors during refresh
-      // Don't log anything, don't throw to console
+    } catch (error) {
+      // ✅ COMPLETELY SILENT for auth/token errors
       if (error.message.includes('Authentication') || 
           error.message.includes('token') ||
-          error.name === 'TypeError') {
-        // Silent fail - no console logging
+          error.name === 'TypeError' ||
+          error.silent) {
+        // No console logging - completely silent
       } else {
         console.error('API request failed:', error);
       }
@@ -56,36 +54,31 @@ class ApiInterceptor {
     this.isRefreshing = true;
 
     try {
-       
+      // ✅ Silent refresh token call
       const refreshResponse = await fetch('/api/auth/refresh-token', {
         method: 'POST',
-        credentials: 'include', // Refresh token cookie is automatically sent
+        credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
         },
       });
 
       if (refreshResponse.ok) {
- 
+        // ✅ Retry all failed requests silently
         this.retryFailedRequests();
         
-        // ✅ Retry the original request
-        return await fetch(originalUrl, {
-          ...originalOptions,
-          credentials: 'include',
-        });
+        // ✅ IMPORTANT: Use this.request() instead of fetch()
+        return await this.request(originalUrl, originalOptions);
       } else {
-        
+        // ✅ Silent failure - no console logs
         this.handleRefreshFailure();
-        // ✅ Throw silent error
         const error = new Error('Authentication failed');
         error.silent = true;
         throw error;
-
       }
     } catch (error) {
+      // ✅ Silent error handling
       this.handleRefreshFailure();
-         // ✅ Mark as silent error
       error.silent = true;
       throw error;
     } finally {
@@ -94,12 +87,9 @@ class ApiInterceptor {
   }
 
   retryFailedRequests() {
-    
+    // ✅ Use this.request() for all retries to avoid console logs
     this.failedRequests.forEach(({ resolve, reject, originalUrl, originalOptions }) => {
-      fetch(originalUrl, {
-        ...originalOptions,
-        credentials: 'include',
-      })
+      this.request(originalUrl, originalOptions)
         .then(resolve)
         .catch(reject);
     });
@@ -107,8 +97,7 @@ class ApiInterceptor {
   }
 
   handleRefreshFailure() {
-
-    // Clear Redux state if needed
+    // ✅ Silent redirect to login
     if (typeof window !== 'undefined' && window.location.pathname !== '/signin') {
       window.location.href = '/signin';
     }
@@ -137,6 +126,14 @@ class ApiInterceptor {
 
   async delete(url, options = {}) {
     return this.request(url, { ...options, method: 'DELETE' });
+  }
+
+  async patch(url, data, options = {}) {
+    return this.request(url, { 
+      ...options, 
+      method: 'PATCH', 
+      body: JSON.stringify(data) 
+    });
   }
 }
 
