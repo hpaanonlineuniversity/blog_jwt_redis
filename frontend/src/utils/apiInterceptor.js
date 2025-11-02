@@ -102,8 +102,8 @@ class ApiInterceptor {
 
   handleRefreshFailure() {
     // ✅ Silent redirect to login
-    if (typeof window !== 'undefined' && window.location.pathname !== '/signin') {
-      window.location.href = '/signin';
+    if (typeof window !== 'undefined' && window.location.pathname !== '/sign-in') {
+      window.location.href = '/sign-in';
     }
   }
 

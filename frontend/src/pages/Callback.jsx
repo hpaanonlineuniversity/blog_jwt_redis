@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { useNavigate } from 'react-router';
 import { supabase } from '../supabase.js'
 import { useDispatch } from 'react-redux'
-import { signInSuccess } from '../redux/user/userSlice.js'; //redux
+import { signInSuccess } from '../redux/user/userSlice.js';
 
 export default function Callback() {
   const navigate = useNavigate();

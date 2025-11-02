@@ -12,7 +12,7 @@ import {
 import { useState, useRef, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router';
-import { apiInterceptor } from '../utils/apiInterceptor'; // ✅ Import the interceptor
+import { apiInterceptor } from '../utils/apiInterceptor';
 
 export default function CreatePost() {
   const navigate = useNavigate(); 
